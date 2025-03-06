@@ -38,7 +38,7 @@ func NewRowSet(rows *sql.Rows) RowSet {
 	return &sqlRowsWrapper{inner: rows}
 }
 
-func (rows *sqlRowsWrapper) Close() (error) {
+func (rows *sqlRowsWrapper) Close() error {
 	return rows.inner.Close()
 }
 
@@ -49,7 +49,7 @@ func (rows *sqlRowsWrapper) ColumnTypes() ([]ColumnType, error) {
 	}
 
 	wrapped := make([]ColumnType, 0, len(colTypes))
-	for _,colType := range colTypes {
+	for _, colType := range colTypes {
 		wrapped = append(wrapped, &sqlColTypeWrapper{inner: colType})
 	}
 

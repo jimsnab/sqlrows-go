@@ -146,8 +146,8 @@ func TestMockRowSetNextResultSet(t *testing.T) {
 func TestMockColumnTypeDatabaseTypeName(t *testing.T) {
 	it := newTestCommon(t).
 		HasMockRowSet([]string{
-			"name=ID;type=int64",                // Default database type from dbTypesSnowflake
-			"name=NAME;type=string",             // Default database type
+			"name=ID;type=int64",                           // Default database type from dbTypesSnowflake
+			"name=NAME;type=string",                        // Default database type
 			"name=TS;type=*time.Time;dbType=TIMESTAMP_NTZ", // Explicit dbType override
 		}, DbTypeSnowflake)
 

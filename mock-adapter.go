@@ -17,8 +17,8 @@ type (
 	DatabaseType int
 
 	mockRowSet struct {
-		order map[string]struct{}
-		orderLwr map[string]int
+		order       map[string]struct{}
+		orderLwr    map[string]int
 		columns     []string
 		columnTypes []*mockColumnType
 		values      [][]any
@@ -28,7 +28,7 @@ type (
 	}
 
 	mockColumnType struct {
-		colName string
+		colName      string
 		colType      reflect.Type
 		nullable     bool
 		length       int64
@@ -49,25 +49,25 @@ var onPanic = func(errMsg string) { panic(errMsg) }
 // Creates a mock table, where [cols] is semicolon-separated list of <keyword>=<value>,
 // where <keyword> choices are:
 //
-//  name     	The column name (required)
-//  type        The Go type for the column (required)
-//  length      Field length (optional)
-//  precision   Decimal precision (optional)
-//  scale       Field scale (optional)
-//  dbType      Name of the database type (optional)
+//	name     	The column name (required)
+//	type        The Go type for the column (required)
+//	length      Field length (optional)
+//	precision   Decimal precision (optional)
+//	scale       Field scale (optional)
+//	dbType      Name of the database type (optional)
 //
 // Examples:
-//  	"name=UPDATE_TS;type=*time.Time"
-//      "name=KEY;type=uuid.UUID"
-//      "name=NAME;type=string;length=64"
 //
+//		"name=UPDATE_TS;type=*time.Time"
+//	    "name=KEY;type=uuid.UUID"
+//	    "name=NAME;type=string;length=64"
 func NewMockRowSet(cols []string, dbType DatabaseType) MockRowSet {
 	row := mockRowSet{
-		order: map[string]struct{}{},
+		order:    map[string]struct{}{},
 		orderLwr: map[string]int{},
 	}
 
-	for _,colSpec := range cols {
+	for _, colSpec := range cols {
 		parseColumnSpec(colSpec, dbType, &row)
 	}
 
@@ -79,9 +79,10 @@ func (set *mockRowSet) Add(row map[string]any) {
 	for k, v := range row {
 		colIndex, valid := set.orderLwr[strings.ToLower(k)]
 		if !valid {
-			onPanic(fmt.Sprintf("column %s does not exist", k)); return
+			onPanic(fmt.Sprintf("column %s does not exist", k))
+			return
 		}
-		
+
 		vals[colIndex] = v
 	}
 	set.values = append(set.values, vals)
@@ -117,7 +118,7 @@ func (m *mockRowSet) Close() error {
 
 func (m *mockRowSet) ColumnTypes() ([]ColumnType, error) {
 	list := make([]ColumnType, 0, len(m.columnTypes))
-	for _,ct := range m.columnTypes {
+	for _, ct := range m.columnTypes {
 		list = append(list, ct)
 	}
 	return list, nil
@@ -173,7 +174,8 @@ func (m *mockRowSet) Scan(dest ...any) error {
 func parseColumnSpec(colSpec string, dbType DatabaseType, row *mockRowSet) {
 	parts := strings.Split(colSpec, ";")
 	if len(parts) == 0 {
-		onPanic(fmt.Sprintf("empty column specification: %s", colSpec)); return
+		onPanic(fmt.Sprintf("empty column specification: %s", colSpec))
+		return
 	}
 
 	var colName string
@@ -191,7 +193,8 @@ func parseColumnSpec(colSpec string, dbType DatabaseType, row *mockRowSet) {
 		}
 		kv := strings.SplitN(part, "=", 2)
 		if len(kv) != 2 {
-			onPanic(fmt.Sprintf("invalid key=value pair in column spec: %s", part)); return
+			onPanic(fmt.Sprintf("invalid key=value pair in column spec: %s", part))
+			return
 		}
 		key := strings.TrimSpace(kv[0])
 		value := strings.TrimSpace(kv[1])
@@ -204,34 +207,40 @@ func parseColumnSpec(colSpec string, dbType DatabaseType, row *mockRowSet) {
 		case "length":
 			l, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				onPanic(fmt.Sprintf("invalid length in column spec: %s", value)); return
+				onPanic(fmt.Sprintf("invalid length in column spec: %s", value))
+				return
 			}
 			length = &l
 		case "precision":
 			p, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				onPanic(fmt.Sprintf("invalid precision in column spec: %s", value)); return
+				onPanic(fmt.Sprintf("invalid precision in column spec: %s", value))
+				return
 			}
 			precision = &p
 		case "scale":
 			s, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				onPanic(fmt.Sprintf("invalid scale in column spec: %s", value)); return
+				onPanic(fmt.Sprintf("invalid scale in column spec: %s", value))
+				return
 			}
 			scale = &s
 		case "dbType":
 			dbTypeStr = value
 		default:
-			onPanic(fmt.Sprintf("unknown keyword in column spec: %s", key)); return
+			onPanic(fmt.Sprintf("unknown keyword in column spec: %s", key))
+			return
 		}
 	}
 
 	// Validate required fields
 	if colName == "" {
-		onPanic(fmt.Sprintf("column spec missing required 'name': %s", colSpec)); return
+		onPanic(fmt.Sprintf("column spec missing required 'name': %s", colSpec))
+		return
 	}
 	if typeStr == "" {
-		onPanic(fmt.Sprintf("column spec missing required 'type': %s", colSpec)); return
+		onPanic(fmt.Sprintf("column spec missing required 'type': %s", colSpec))
+		return
 	}
 
 	// Get Go type and default database type
@@ -246,7 +255,8 @@ func parseColumnSpec(colSpec string, dbType DatabaseType, row *mockRowSet) {
 	// Load defaults
 	defaultTable := dbTypeDefaults[dbType]
 	if defaultTable == nil {
-		onPanic("datatabase type is not valid"); return
+		onPanic("datatabase type is not valid")
+		return
 	}
 	defaults := defaultTable[dbColType]
 
@@ -262,7 +272,7 @@ func parseColumnSpec(colSpec string, dbType DatabaseType, row *mockRowSet) {
 
 	// Create the column type
 	colType := &mockColumnType{
-		colName: colName,
+		colName:      colName,
 		colType:      goColType,
 		nullable:     nullable,
 		length:       *length,
@@ -274,7 +284,8 @@ func parseColumnSpec(colSpec string, dbType DatabaseType, row *mockRowSet) {
 	// Add to mockRowSet
 	colNameLwr := strings.ToLower(colName)
 	if _, exists := row.orderLwr[colNameLwr]; exists {
-		onPanic(fmt.Sprintf("duplicate column name in mock row set: %s", colName)); return
+		onPanic(fmt.Sprintf("duplicate column name in mock row set: %s", colName))
+		return
 	}
 	index := len(row.columns)
 	row.order[colName] = struct{}{}
@@ -299,7 +310,8 @@ func getColumnType(typeStr string, dbType DatabaseType) (goColType reflect.Type,
 
 	base := baseTypes[baseType]
 	if base == nil {
-		onPanic(fmt.Sprintf("unsupported type: %s", typeStr)); return
+		onPanic(fmt.Sprintf("unsupported type: %s", typeStr))
+		return
 	}
 
 	if isPointer {
@@ -317,11 +329,13 @@ func getColumnType(typeStr string, dbType DatabaseType) (goColType reflect.Type,
 	case DbTypeMsSQL:
 		dbColType = dbTypesMsSql[baseType]
 	default:
-		onPanic("invalid database type"); return
+		onPanic("invalid database type")
+		return
 	}
 
 	if dbColType == "" {
-		onPanic(fmt.Sprintf("database type table out of sync with base type table for base type %s", baseType)); return
+		onPanic(fmt.Sprintf("database type table out of sync with base type table for base type %s", baseType))
+		return
 	}
 
 	return

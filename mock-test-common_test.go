@@ -17,17 +17,17 @@ type (
 		now       time.Time
 		uuid      uuid.UUID
 		rowsAdded int
-		panicMsg string
+		panicMsg  string
 	}
 
 	testColumnType struct {
-		colName      string
-		goType       reflect.Type
-		dbType       string
-		nullable     bool
-		length       int64
-		precision    int64
-		scale        int64
+		colName   string
+		goType    reflect.Type
+		dbType    string
+		nullable  bool
+		length    int64
+		precision int64
+		scale     int64
 	}
 )
 
