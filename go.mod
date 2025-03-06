@@ -1,4 +1,4 @@
-module github.com/jimsnab/sqlrows
+module github.com/jimsnab/sqlrows-go
 
 go 1.24.0
 
