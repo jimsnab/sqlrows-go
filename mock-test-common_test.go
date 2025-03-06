@@ -44,9 +44,17 @@ func (it *testCommon) HasMockRowSet(cols []string, dbType DatabaseType) *testCom
 	return it
 }
 
-func (it *testCommon) AddsRows(rows ...map[string]any) *testCommon {
+func (it *testCommon) AddsRowTables(rows ...map[string]any) *testCommon {
 	for _, row := range rows {
 		it.rs.Add(row)
+		it.rowsAdded++
+	}
+	return it
+}
+
+func (it *testCommon) AddsRows(values [][]any) *testCommon {
+	for _, row := range values {
+		it.rs.AddRow(row)
 		it.rowsAdded++
 	}
 	return it

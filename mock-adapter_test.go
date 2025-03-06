@@ -88,10 +88,29 @@ func TestMockRowSetAddAndScan(t *testing.T) {
 		"name=NAME;type=string",
 		"name=TS;type=*time.Time",
 	}, DbTypeSnowflake).
-		AddsRows(
+		AddsRowTables(
 			map[string]any{"ID": int64(1), "NAME": "Test1", "TS": &it.now},
 			map[string]any{"ID": int64(2), "NAME": "Test2", "TS": nil},
 		)
+
+	it.VerifiesScan(
+		[]any{int64(1), "Test1", &it.now},
+		[]any{int64(2), "Test2", nil},
+	)
+}
+
+func TestMockRowSetAddAndScan2(t *testing.T) {
+	it := newTestCommon(t)
+
+	it.HasMockRowSet([]string{
+		"name=ID;type=int64",
+		"name=NAME;type=string",
+		"name=TS;type=*time.Time",
+	}, DbTypeSnowflake).
+		AddsRows([][]any{
+			{int64(1), "Test1", &it.now},
+			{int64(2), "Test2", nil},
+		})
 
 	it.VerifiesScan(
 		[]any{int64(1), "Test1", &it.now},
@@ -104,7 +123,7 @@ func TestMockRowSetAddInvalidColumn(t *testing.T) {
 	it := newTestCommon(t).
 		HasMockRowSet([]string{"name=ID;type=int"}, DbTypePostgresSQL).
 		HooksPanic().
-		AddsRows(map[string]any{"XYZ": 123})
+		AddsRowTables(map[string]any{"XYZ": 123})
 
 	it.ExpectedPanic("column XYZ does not exist")
 }
@@ -113,7 +132,7 @@ func TestMockRowSetAddInvalidColumn(t *testing.T) {
 func TestMockRowSetScanErrors(t *testing.T) {
 	it := newTestCommon(t).
 		HasMockRowSet([]string{"name=ID;type=int;dbType=INTEGER"}, DbTypeMsSQL).
-		AddsRows(map[string]any{"ID": 42})
+		AddsRowTables(map[string]any{"ID": 42})
 
 	it.VerifiesScan([]any{42}).
 		VerifiesScanExhausted()
@@ -122,7 +141,7 @@ func TestMockRowSetScanErrors(t *testing.T) {
 func TestMockRowSetNextResultSet(t *testing.T) {
 	it := newTestCommon(t).
 		HasMockRowSet([]string{"name=ID;type=int"}, DbTypeSnowflake).
-		AddsRows(
+		AddsRowTables(
 			map[string]any{"ID": 1},
 			map[string]any{"ID": 2},
 		)
@@ -237,7 +256,7 @@ func TestMockColumnTypeName(t *testing.T) {
 func TestMockRowSetScanWithoutNext(t *testing.T) {
 	it := newTestCommon(t).
 		HasMockRowSet([]string{"name=ID;type=int"}, DbTypeSnowflake).
-		AddsRows(map[string]any{"ID": 42})
+		AddsRowTables(map[string]any{"ID": 42})
 
 	// Attempt Scan without calling Next
 	var id int

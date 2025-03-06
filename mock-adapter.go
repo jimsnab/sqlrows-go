@@ -12,6 +12,7 @@ type (
 	MockRowSet interface {
 		RowSet
 		Add(row map[string]any)
+		AddRow(values []any)
 	}
 
 	DatabaseType int
@@ -85,6 +86,12 @@ func (set *mockRowSet) Add(row map[string]any) {
 
 		vals[colIndex] = v
 	}
+	set.values = append(set.values, vals)
+}
+
+func (set *mockRowSet) AddRow(values []any) {
+	vals := make([]any, len(set.columns))
+	copy(vals, values)
 	set.values = append(set.values, vals)
 }
 
