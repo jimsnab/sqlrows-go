@@ -73,7 +73,7 @@ func (rows *sqlRowsWrapper) NextResultSet() bool {
 }
 
 func (rows *sqlRowsWrapper) Scan(dest ...any) error {
-	return rows.inner.Scan()
+	return rows.inner.Scan(dest...)
 }
 
 func (colType *sqlColTypeWrapper) DatabaseTypeName() string {
